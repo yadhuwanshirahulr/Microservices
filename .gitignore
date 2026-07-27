@@ -1,0 +1,9 @@
+# IntelliJ IDEA project files
+accounts/.idea/
+cards/.idea/
+loans/.idea/
+
+# Maven build output
+accounts/target/
+cards/target/
+loans/target/
