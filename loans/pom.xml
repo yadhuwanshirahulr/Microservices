@@ -113,19 +113,22 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                   <image>
-                       <env>
-                           <BP_JVM_VERSION>21</BP_JVM_VERSION>
-                       </env>
-                       <name>yadhuwanshirahulr/${project.name}:v1</name>
-                   </image>
-
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>3.5.1</version>
+                <configuration>
+                    <to>
+                        <image>eazybytes/${project.artifactId}:v1</image>
+                    </to>
                 </configuration>
             </plugin>
         </plugins>
