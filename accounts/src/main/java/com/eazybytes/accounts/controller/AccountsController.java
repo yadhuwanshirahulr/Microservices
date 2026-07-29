@@ -16,6 +16,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * @author Eazy Bytes
+ * @author yadhuwanshirahulr
  */
 
 @Tag(
@@ -40,6 +41,9 @@ public class AccountsController {
 
     @Value("${build.version}")
     private String buildVersion;
+
+    @Autowired
+    private Environment environment;
 
     @Operation(
             summary = "Create Account REST API",
@@ -170,6 +174,11 @@ public class AccountsController {
     @GetMapping("build-info")
     public ResponseEntity<String> getBuildVersion(){
         return new ResponseEntity<>(buildVersion,HttpStatus.OK);
+    }
+
+    @GetMapping("java-version")
+    public ResponseEntity<String> getJavaVersion(){
+        return new ResponseEntity<>(environment.getProperty("JAVA_HOME"),HttpStatus.OK);
     }
 
 }
