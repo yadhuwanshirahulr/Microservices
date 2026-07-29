@@ -1,6 +1,7 @@
 package com.eazybytes.accounts.controller;
 
 import com.eazybytes.accounts.constants.AccountsConstants;
+import com.eazybytes.accounts.dto.AccountsContatctInfoDto;
 import com.eazybytes.accounts.dto.CustomerDto;
 import com.eazybytes.accounts.dto.ErrorResponseDto;
 import com.eazybytes.accounts.dto.ResponseDto;
@@ -14,6 +15,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +25,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * @author Eazy Bytes
+ * @author yadhuwanshirahulr
  */
 
 @Tag(
@@ -30,11 +34,20 @@ import org.springframework.web.bind.annotation.*;
 )
 @RestController
 @RequestMapping(path="/api", produces = {MediaType.APPLICATION_JSON_VALUE})
-@AllArgsConstructor
 @Validated
 public class AccountsController {
 
+    @Autowired
     private IAccountsService iAccountsService;
+
+    @Value("${build.version}")
+    private String buildVersion;
+
+    @Autowired
+    private Environment environment;
+
+    @Autowired
+    private AccountsContatctInfoDto accountsContatctInfoDto;
 
     @Operation(
             summary = "Create Account REST API",
@@ -162,5 +175,18 @@ public class AccountsController {
         }
     }
 
+    @GetMapping("build-info")
+    public ResponseEntity<String> getBuildVersion(){
+        return new ResponseEntity<>(buildVersion,HttpStatus.OK);
+    }
+
+    @GetMapping("java-version")
+    public ResponseEntity<String> getJavaVersion(){
+        return new ResponseEntity<>(environment.getProperty("JAVA_HOME"),HttpStatus.OK);
+    }
+    @GetMapping("contact-info")
+    public ResponseEntity<AccountsContatctInfoDto> getContactInfo(){
+        return new ResponseEntity<>(accountsContatctInfoDto,HttpStatus.OK);
+    }
 
 }
