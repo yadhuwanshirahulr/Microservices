@@ -1,0 +1,15 @@
+spring:
+  config:
+    activate:
+      on-profile: "prod"
+build:
+  version: "live"
+
+accounts:
+  message: "Message from live/prod profile"
+  contactDetails:
+    name: "live server"
+    email: "live@server.com"
+  onCallSupport:
+    - (911)3456778
+    - (911)2346789
