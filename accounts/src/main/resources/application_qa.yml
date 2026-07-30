@@ -1,0 +1,15 @@
+spring:
+  config:
+    activate:
+      on-profile: "qa"
+build:
+  version: "QA"
+
+accounts:
+  message: "Message from QA profile"
+  contactDetails:
+    name: "QA profile"
+    email: "QA@gmail.com"
+  onCallSupport:
+    - (66)12345
+    - (66)34578
