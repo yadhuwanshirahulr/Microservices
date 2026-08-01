@@ -1,13 +1,8 @@
-spring:
-  config:
-    activate:
-      on-profile: "live"
-
 
 build:
   version: "live"
 
-loans:
+accounts:
   message: "Message from live/prod profile"
   contactDetails:
     name: "live server"

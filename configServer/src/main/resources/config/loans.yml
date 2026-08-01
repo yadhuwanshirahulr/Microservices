@@ -1,0 +1,12 @@
+
+build:
+  version: 1.0
+
+loans:
+  message: "Learning Advance SpringBoot will switch in next 3 months"
+  contactDetails:
+    name: "Rahul Kumar"
+    email: "Yadhuwanshirahulraaz@gmail.com"
+  onCallSupport:
+    - (055)654343
+    - (055)667754

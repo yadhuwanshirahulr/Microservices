@@ -1,6 +1,12 @@
 server:
   port: 8090
 spring:
+  application:
+    name: "loans"
+  profiles:
+    active: "prod"
+  config:
+    import: "optional:configserver:http://localhost:8071/"
   datasource:
     url: jdbc:h2:mem:testdb
     driverClassName: org.h2.Driver
@@ -14,21 +20,3 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-  config:
-    import:
-      - "application_qa.yml"
-      - "application_prod.yml"
-  profiles:
-    active: "qa"
-
-build:
-  version: 1.0
-
-loans:
-  message: "Learning Advance SpringBoot will switch in next 3 months"
-  contactDetails:
-    name: "Rahul Kumar"
-    email: "Yadhuwanshirahulraaz@gmail.com"
-  onCallSupport:
-    - (055)654343
-    - (055)667754

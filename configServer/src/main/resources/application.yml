@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: "configServer"
+  profiles:
+    active: native
+  cloud:
+    config:
+      native:
+        search-locations: "classpath:/config"
+        #If you want to read configuration file from any System folder then
+        #search-locations: "C://user/config
+server:
+  port: 8071
