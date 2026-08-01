@@ -19,3 +19,8 @@ spring:
           force-pull: true
 server:
   port: 8071
+
+#by providing this encrypt we can encrypt any plain text by defaults in enable a post api /encrypt where pass plain text that will give you a encrypted value replace the plain text with that encrypted value and before that a {cipher} so will loading that property microservices understand that it is encrypted and decrypt it by default
+#To test this i have encrypted value in accounts.prod file
+encrypt:
+  key: "41e39153f847e65153fe4c39a6e669efe4aaa8b958e98e3ab9e11df3dc7acb83"
