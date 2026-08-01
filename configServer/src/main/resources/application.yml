@@ -2,12 +2,20 @@ spring:
   application:
     name: "configServer"
   profiles:
-    active: native
+    #active: native this is only if we are using local file or any other microservice
+    active: git
   cloud:
     config:
-      native:
-        search-locations: "classpath:/config"
+      #native:
+        #search-locations: "classpath:/config"
         #If you want to read configuration file from any System folder then
         #search-locations: "C://user/config
+      server:
+        git:
+          uri: "https://github.com/yadhuwanshirahulr/Configurations.git"
+          default-label: main
+          timeout: 10
+          clone-on-start: true
+          force-pull: true
 server:
   port: 8071
