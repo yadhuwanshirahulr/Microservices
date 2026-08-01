@@ -1,11 +1,8 @@
-spring:
-  config:
-    activate:
-      on-profile: "qa"
+
 build:
   version: "QA"
 
-accounts:
+cards:
   message: "Message from QA profile"
   contactDetails:
     name: "QA profile"
