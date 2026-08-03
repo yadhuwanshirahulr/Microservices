@@ -21,3 +21,9 @@ spring:
       ddl-auto: update
     show-sql: true
 
+# This will enable the all actutator end points we will use refresh endpoint to refresh the change made in configServer and load value in our respective microservice without restarting microservices
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
