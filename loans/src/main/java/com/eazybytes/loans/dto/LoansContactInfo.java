@@ -1,5 +1,7 @@
 package com.eazybytes.loans.dto;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
@@ -7,5 +9,11 @@ import java.util.Map;
 
 
 @ConfigurationProperties(prefix = "loans")
-public record LoansContactInfo(String message, Map<String,String> contactDetails, List<String> onCallSupport) {
+@Getter
+@Setter
+public class LoansContactInfo {
+    private String message;
+    private Map<String,String> contactDetails;
+    private List<String> onCallSupport;
 }
+//change record to class so we can change the values at runtime form the configServer at runtime without starting the application again and again.
