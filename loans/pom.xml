@@ -148,7 +148,7 @@
                 <version>3.5.1</version>
                 <configuration>
                     <to>
-                        <image>eazybytes/${project.artifactId}:v1</image>
+                        <image>yadhuwanshirahulr/${project.artifactId}:v2</image>
                     </to>
                 </configuration>
             </plugin>
