@@ -628,6 +628,312 @@ docker logs loans-ms
 docker logs cards-ms
 ```
 
+## Database Configuration with Docker
+
+This section documents how MySQL databases are configured and deployed using Docker Compose.
+
+### Databases Overview
+
+Each microservice has its own dedicated MySQL database to ensure data isolation:
+
+- **accountsdb**: Database for the Accounts microservice
+- **loansdb**: Database for the Loans microservice
+- **cardsdb**: Database for the Cards microservice
+
+### Database Configuration in Docker Compose
+
+All databases extend the `microservice-db-config` from `common-config.yml`:
+
+```yaml
+accountsdb:
+  container_name: accountsdb
+  ports:
+    - 3306:3306
+  environment:
+    MYSQL_DATABASE: accountsdb
+  extends:
+    file: common-config.yml
+    service: microservice-db-config
+
+loansdb:
+  container_name: loansdb
+  ports:
+    - 3307:3306
+  environment:
+    MYSQL_DATABASE: loansdb
+  extends:
+    file: common-config.yml
+    service: microservice-db-config
+
+cardsdb:
+  container_name: cardsdb
+  ports:
+    - 3308:3306
+  environment:
+    MYSQL_DATABASE: cardsdb
+  extends:
+    file: common-config.yml
+    service: microservice-db-config
+```
+
+Key configuration details:
+
+- **Image**: MySQL (latest version)
+- **Root Credentials**: `MYSQL_ROOT_PASSWORD: root` (from common-config.yml)
+- **Port Mapping**:
+  - `accountsdb`: Host port `3306` → Container port `3306`
+  - `loansdb`: Host port `3307` → Container port `3306`
+  - `cardsdb`: Host port `3308` → Container port `3306`
+- **Health Check**: MySQL includes a health check using `mysqladmin ping -h localhost`
+  - Interval: 10 seconds
+  - Timeout: 10 seconds
+  - Retries: 10 attempts
+  - Start period: 10 seconds
+
+The health check ensures the database is ready before microservices connect.
+
+### Microservice Database Configuration
+
+Each microservice connects to its corresponding database using environment variables in the Compose file:
+
+**Accounts Service:**
+```yaml
+environment:
+  SPRING_DATASOURCE_URL: "jdbc:mysql://accountsdb:3306/accountsdb"
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: "com.mysql.cj.jdbc.Driver"
+  SPRING_DATASOURCE_USERNAME: "root"
+  SPRING_DATASOURCE_PASSWORD: "root"
+```
+
+**Loans Service:**
+```yaml
+environment:
+  SPRING_DATASOURCE_URL: "jdbc:mysql://loansdb:3306/loansdb"
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: "com.mysql.cj.jdbc.Driver"
+  SPRING_DATASOURCE_USERNAME: "root"
+  SPRING_DATASOURCE_PASSWORD: "root"
+```
+
+**Cards Service:**
+```yaml
+environment:
+  SPRING_DATASOURCE_URL: "jdbc:mysql://cardsdb:3306/cardsdb"
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: "com.mysql.cj.jdbc.Driver"
+  SPRING_DATASOURCE_USERNAME: "root"
+  SPRING_DATASOURCE_PASSWORD: "root"
+```
+
+**Important**: Inside Docker containers, services use the Compose service names (`accountsdb`, `loansdb`, `cardsdb`) instead of `localhost`. This is because Docker Compose creates an internal network where containers can resolve each other by service name.
+
+### Database Dependency Management
+
+Microservices depend on their databases using health checks:
+
+```yaml
+accounts:
+  depends_on:
+    accountsdb:
+      condition: service_healthy
+    configserver:
+      condition: service_healthy
+```
+
+The `service_healthy` condition ensures:
+- The database is running
+- The MySQL health check passes
+- Only then the microservice starts
+
+This prevents connection errors when microservices try to initialize.
+
+## Running Everything with Docker Compose
+
+### Prerequisites
+
+- Docker and Docker Compose installed
+- Configuration repository accessible (Git repository must be cloned or accessible)
+- Adequate disk space and memory (recommend 4GB+ RAM)
+
+### Quick Start
+
+1. **Start All Services (Databases, Config Server, and Microservices)**:
+
+   ```powershell
+   cd D:\Backend\Microservices
+   docker compose -f docker-compose/default/docker-compose.yml up -d
+   ```
+
+   The `-d` flag runs containers in the background (detached mode).
+
+2. **Verify Services Are Running**:
+
+   ```powershell
+   docker compose -f docker-compose/default/docker-compose.yml ps
+   ```
+
+   Expected output:
+   ```
+   NAME           STATUS                  PORTS
+   accountsdb     Up (healthy)            0.0.0.0:3306->3306/tcp
+   loansdb        Up (healthy)            0.0.0.0:3307->3306/tcp
+   cardsdb        Up (healthy)            0.0.0.0:3308->3306/tcp
+   configServer-ms    Up (healthy)       0.0.0.0:8071->8071/tcp
+   accounts-ms    Up                      0.0.0.0:8080->8080/tcp
+   loans-ms       Up                      0.0.0.0:8090->8090/tcp
+   cards-ms       Up                      0.0.0.0:9000->9000/tcp
+   ```
+
+3. **Check Service Logs**:
+
+   View logs for a specific service:
+   ```powershell
+   docker logs accountsdb
+   docker logs accounts-ms
+   docker logs configServer-ms
+   ```
+
+   Stream logs (follow mode):
+   ```powershell
+   docker logs -f accounts-ms
+   ```
+
+### Testing Database Connections
+
+1. **Connect to a Database from Host Machine**:
+
+   Using MySQL client (if installed):
+   ```bash
+   mysql -h localhost -P 3306 -u root -p accountsdb
+   # Password: root
+   ```
+
+   Or using Docker exec:
+   ```powershell
+   docker exec -it accountsdb mysql -u root -proot -D accountsdb
+   ```
+
+2. **Verify Database Initialization**:
+
+   ```powershell
+   docker exec accountsdb mysql -u root -proot accountsdb -e "SHOW TABLES;"
+   ```
+
+### Testing Microservice Endpoints
+
+1. **Accounts Service**:
+   ```powershell
+   curl http://localhost:8080/api/build-info
+   curl http://localhost:8080/api/contact-info
+   ```
+
+2. **Loans Service**:
+   ```powershell
+   curl http://localhost:8090/api/build-info
+   curl http://localhost:8090/api/contact-info
+   ```
+
+3. **Cards Service**:
+   ```powershell
+   curl http://localhost:9000/api/build-info
+   curl http://localhost:9000/api/contact-info
+   ```
+
+4. **Config Server**:
+   ```powershell
+   curl http://localhost:8071/accounts/default
+   curl http://localhost:8071/loans/default
+   curl http://localhost:8071/cards/default
+   ```
+
+### Stopping Services
+
+1. **Stop All Running Services**:
+
+   ```powershell
+   docker compose -f docker-compose/default/docker-compose.yml down
+   ```
+
+   This stops and removes containers but preserves networks and volumes.
+
+2. **Stop and Remove Everything (including volumes)**:
+
+   ```powershell
+   docker compose -f docker-compose/default/docker-compose.yml down -v
+   ```
+
+   **Warning**: This deletes database data. Use only for cleanup.
+
+3. **Stop Services Without Removing**:
+
+   ```powershell
+   docker compose -f docker-compose/default/docker-compose.yml stop
+   ```
+
+### Restarting Services
+
+Restart all services:
+```powershell
+docker compose -f docker-compose/default/docker-compose.yml restart
+```
+
+Restart a specific service:
+```powershell
+docker compose -f docker-compose/default/docker-compose.yml restart accounts
+```
+
+### Viewing Service Startup Order
+
+The startup order is controlled by dependencies:
+
+1. **Databases Start First** (no dependencies)
+   - accountsdb
+   - loansdb
+   - cardsdb
+
+2. **Config Server Starts Next** (no dependencies in Docker Compose)
+   - configserver
+
+3. **Microservices Start Last** (wait for both database and config server to be healthy)
+   - accounts (waits for accountsdb and configserver)
+   - loans (waits for loansdb and configserver)
+   - cards (waits for cardsdb and configserver)
+
+### Troubleshooting
+
+**Problem**: Microservices fail to start with connection errors
+
+**Solution**: Check if databases are healthy:
+```powershell
+docker compose ps  # Look for (healthy) status
+docker logs accountsdb
+```
+
+---
+
+**Problem**: "Cannot connect to Config Server" error
+
+**Solution**: Verify Config Server is running and healthy:
+```powershell
+curl http://localhost:8071/actuator/health/readiness
+```
+
+---
+
+**Problem**: Database credentials incorrect
+
+**Solution**: Check environment variables in docker-compose.yml:
+- Root user: `root`
+- Root password: `root` (from common-config.yml)
+
+---
+
+**Problem**: Port already in use (e.g., port 3306 already occupied)
+
+**Solution**: Change port mapping in docker-compose.yml or stop the conflicting service:
+```powershell
+docker ps  # Find the container using the port
+docker stop <container-id>
+```
+
 ### Important Notes
 
 - `configServer/pom.xml` builds the Config Server image
@@ -635,9 +941,11 @@ docker logs cards-ms
 - `accounts/pom.xml`, `loans/pom.xml`, and `cards/pom.xml` include
   `spring-cloud-starter-bus-amqp` so they can use RabbitMQ for Spring Cloud Bus.
 - Inside Docker, services should use Compose service names such as
-  `configserver` and `rabbit`.
+  `configserver`, `accountsdb`, `loansdb`, and `cardsdb`.
 - On the host machine, use `localhost` with the published ports.
-- `localhost:8080` is Accounts, not Config Server.
+- `localhost:3306` is accountsdb, `localhost:3307` is loansdb, `localhost:3308` is cardsdb.
+- `localhost:8080` is Accounts, `localhost:8090` is Loans, `localhost:9000` is Cards.
 - `localhost:8071` is Config Server.
 - Compose `depends_on` with `condition: service_healthy` prevents services from
   starting before their dependencies are ready.
+- Database volumes are managed by Docker. To reset databases, use `docker compose down -v`.
