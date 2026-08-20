@@ -1,9 +1,27 @@
-# IntelliJ IDEA project files
-accounts/.idea/
-cards/.idea/
-loans/.idea/
+# IntelliJ IDEA and other IDE files
+.idea/
+**/.idea/
+*.iml
 
 # Maven build output
-accounts/target/
-cards/target/
-loans/target/
+target/
+**/target/
+
+# Maven wrapper local files
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Build and tooling output
+out/
+logs/
+*.log
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+
